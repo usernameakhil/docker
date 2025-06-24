@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Journal</title>
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <h1>Daily Journal</h1>
+    <form id="journalForm">
+      <input type="date" id="date" required/>
+      <textarea id="content" placeholder="Write your thoughts..." required></textarea>
+      <button type="submit">Save Entry</button>
+    </form>
+    <div id="entries"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('journalForm');
+    const entriesDiv = document.getElementById('entries');
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('date').value;
+      const content = document.getElementById('content').value;
+
+      const res = await fetch('/entries', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ date, content })
+      });
+
+      if (res.ok) {
+        loadEntries();
+        form.reset();
+      }
+    };
+
+    async function loadEntries() {
+      const res = await fetch('/entries');
+      const data = await res.json();
+      entriesDiv.innerHTML = data.map(e => 
+        `<div><strong>${e.date}</strong><p>${e.content}</p></div>`
+      ).join('');
+    }
+
+    loadEntries();
+  </script>
+</body>
+</html>
